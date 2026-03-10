@@ -16,8 +16,11 @@ model = load_model()
 # Streamlit UI
 # -------------------------------
 st.title("Insurance Cost Prediction")
+st.write("Enter your details below:")
 
-# User inputs
+# -------------------------------
+# User Input
+# -------------------------------
 age = st.number_input("Age", 18, 100, 30)
 bmi = st.number_input("BMI", 10.0, 50.0, 25.0)
 children = st.number_input("Number of Children", 0, 10, 0)
@@ -26,27 +29,29 @@ smoker = st.selectbox("Smoker", ["yes", "no"])
 region = st.selectbox("Region", ["northwest", "northeast", "southwest", "southeast"])
 
 # -------------------------------
-# Encode inputs and match training features
+# Preprocess Inputs
 # -------------------------------
-# One-hot encode categorical variables
-sex_encoded = 1 if sex == "male" else 0
-smoker_encoded = 1 if smoker == "yes" else 0
-region_encoded = {
-    "northwest": [1,0,0,0],
-    "northeast": [0,1,0,0],
-    "southwest": [0,0,1,0],
-    "southeast": [0,0,0,1]
-}[region]
+# Encode categorical variables
+input_data = {
+    'age': age,
+    'bmi': bmi,
+    'children': children,
+    'sex': 1 if sex=="male" else 0,
+    'smoker': 1 if smoker=="yes" else 0,
+    # One-hot encode region
+    'region_northwest': 1 if region=="northwest" else 0,
+    'region_northeast': 1 if region=="northeast" else 0,
+    'region_southwest': 1 if region=="southwest" else 0,
+    'region_southeast': 1 if region=="southeast" else 0,
+}
 
-# Build DataFrame in exact column order
-input_df = pd.DataFrame([[
-    age,
-    bmi,
-    children,
-    sex_encoded,
-    smoker_encoded,
-    *region_encoded
-]], columns=model.feature_names_in_)  # <-- VERY IMPORTANT
+# Ensure all model features exist
+for col in model.feature_names_in_:
+    if col not in input_data:
+        input_data[col] = 0  # fill missing features with 0
+
+# Create DataFrame matching model features
+input_df = pd.DataFrame([input_data], columns=model.feature_names_in_)
 
 # -------------------------------
 # Prediction
