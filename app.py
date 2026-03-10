@@ -28,8 +28,9 @@ smoker = 1 if smoker=="yes" else 0
 
 if st.button("Predict Insurance Cost"):
 
-    input_data = np.array([[age,bmi,children,sex,smoker]])
+    input_data = np.array([[age,bmi,children,sex,smoker,region]])
 
     prediction = model.predict(input_data)
+
 
     st.success(f"Estimated Insurance Cost: ${prediction[0]:.2f}")
